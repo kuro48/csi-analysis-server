@@ -119,6 +119,11 @@ async def upload_csi_file(
             analysis_dir = os.path.join('/app/data', 'analysis')
             result_file_path = processor.save_analysis_result(result, analysis_dir)
             
+            # IDを生成して結果に追加
+            import uuid
+            result['id'] = str(uuid.uuid4())
+            result['result_file_path'] = result_file_path
+            
             # データベースに保存
             analysis_result = BreathingAnalysisResult(
                 device_id=result['device_id'],
