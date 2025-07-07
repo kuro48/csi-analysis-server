@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 # 有効なAPIキーのリスト（実際の実装ではデータベースから取得）
 VALID_API_KEYS = {
-    "raspberry_pi_001": "your_api_key_here",
+    "raspberry_pi_001": "test-key-123",
     "raspberry_pi_002": "another_api_key_here"
 }
 
@@ -44,8 +44,10 @@ async def verify_api_key(authorization: Optional[str] = Header(None)) -> str:
     api_key = authorization.replace("Bearer ", "")
     
     # APIキーの検証
+    logger.info(f"受信したAPIキー: {api_key}")
+    logger.info(f"有効なAPIキー: {list(VALID_API_KEYS.values())}")
     if api_key not in VALID_API_KEYS.values():
-        logger.warning(f"無効なAPIキー: {api_key[:10]}...")
+        logger.warning(f"無効なAPIキー: {api_key}")
         raise HTTPException(
             status_code=401,
             detail="無効なAPIキーです",
