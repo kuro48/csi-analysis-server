@@ -372,14 +372,14 @@ class CSIProcessor:
             
             # 結果の構築
             result = {
-                'device_id': metadata.get('device_id'),
-                'timestamp': metadata.get('timestamp'),
-                'collection_duration': metadata.get('collection_duration'),
-                'channel_width': metadata.get('channel_width'),
-                'location': metadata.get('location'),
-                'breathing_rate': float(breathing_rate) if breathing_rate is not None else None,
-                'peak_frequency': float(peak_freq) if peak_freq is not None else None,
-                'peak_height': float(peak_height) if peak_height is not None else None,
+                'device_id': metadata.get('device_id', 'unknown'),
+                'timestamp': metadata.get('timestamp', int(time.time())),
+                'collection_duration': metadata.get('collection_duration', 60),
+                'channel_width': metadata.get('channel_width', '80MHz'),
+                'location': metadata.get('location', 'unknown'),
+                'breathing_rate': float(breathing_rate) if breathing_rate is not None else 0.0,
+                'peak_frequency': float(peak_freq) if peak_freq is not None else 0.0,
+                'peak_height': float(peak_height) if peak_height is not None else 0.0,
                 'selected_subcarriers': selected_cols,
                 'similarities': similarities,
                 'processed_at': datetime.now().isoformat(),
@@ -387,7 +387,10 @@ class CSIProcessor:
                 'csi_data_count': len(csi_data)
             }
             
-            logger.info(f"CSIファイルの処理が完了: 呼吸数 {breathing_rate:.1f} bpm")
+            if breathing_rate is not None:
+                logger.info(f"CSIファイルの処理が完了: 呼吸数 {breathing_rate:.1f} bpm")
+            else:
+                logger.info("CSIファイルの処理が完了: 呼吸数を検出できませんでした")
             return result
             
         except Exception as e:
