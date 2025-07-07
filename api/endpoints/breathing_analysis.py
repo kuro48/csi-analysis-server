@@ -134,7 +134,7 @@ async def upload_csi_file(
                 processed_at=result['processed_at']
             )
             
-            await analysis_service.save_analysis_result(analysis_result)
+            saved_result = await analysis_service.save_analysis_result(result)
             
             if result['breathing_rate'] is not None:
                 logger.info(f"CSIファイルの処理が完了: {result['breathing_rate']} bpm")
@@ -144,7 +144,7 @@ async def upload_csi_file(
             return CSIUploadResponse(
                 success=True,
                 message="CSI file processed successfully",
-                analysis_id=analysis_result.id,
+                analysis_id=saved_result.get('id'),
                 breathing_rate=result['breathing_rate'],
                 timestamp=result['timestamp']
             )
