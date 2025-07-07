@@ -1,6 +1,7 @@
 import os
 import logging
 import ipfshttpclient
+import asyncio
 from typing import Dict, Any, Optional
 
 # ロギング設定
@@ -22,17 +23,27 @@ class IPFSManager:
         self.ipfs_url = f"{protocol}://{host}:{port}/api/v0"
         self.connection_status = False
 
-    async def connect(self) -> bool:
-        try:
-            self.client = ipfshttpclient.connect(self.ipfs_url)
-            self.client.id()
-            self.connection_status = True
-            logger.info(f"IPFSノードに接続しました: {self.ipfs_url}")
-            return True
-        except Exception as e:
-            logger.warning(f"IPFSノード({self.ipfs_url})への接続に失敗: {e}")
-            self.connection_status = False
-            return False
+    async def connect(self, max_retries: int = 5, retry_delay: float = 2.0) -> bool:
+        """IPFSノードへの接続（リトライ機能付き）"""
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"IPFSノードへの接続を試行中... (試行 {attempt + 1}/{max_retries})")
+                self.client = ipfshttpclient.connect(self.ipfs_url, timeout=10)
+                self.client.id()
+                self.connection_status = True
+                logger.info(f"IPFSノードに接続しました: {self.ipfs_url}")
+                return True
+            except Exception as e:
+                logger.warning(f"IPFSノード({self.ipfs_url})への接続に失敗 (試行 {attempt + 1}/{max_retries}): {e}")
+                self.connection_status = False
+                if attempt < max_retries - 1:
+                    logger.info(f"{retry_delay}秒後にリトライします...")
+                    await asyncio.sleep(retry_delay)
+                    retry_delay *= 1.5  # 指数バックオフ
+                else:
+                    logger.error(f"IPFSノードへの接続が失敗しました。最大試行回数に達しました。")
+                    return False
+        return False
 
     async def upload_file(self, file_path: str) -> Optional[str]:
         if not self.connection_status:

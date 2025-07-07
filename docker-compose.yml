@@ -29,6 +29,9 @@ services:
       - "8080:8080"  # IPFS Gateway
     volumes:
       - ipfs_data:/data/ipfs
+    environment:
+      - IPFS_PROFILE=server
+    command: sh -c "ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '[\"*\"]' && ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '[\"PUT\", \"POST\", \"GET\"]' && ipfs config --json API.HTTPHeaders.Access-Control-Allow-Headers '[\"Authorization\"]' && ipfs daemon --migrate=true"
     restart: unless-stopped
     networks:
       - csi-network

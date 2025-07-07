@@ -88,21 +88,29 @@ class BreathingAnalysisService:
                 
             logger.info(f"解析結果を保存しました: {file_path}")
             
-            # IPFS連携
+            # IPFS連携（オプショナル）
             if self.ipfs_manager and self.ipfs_manager.connection_status:
-                ipfs_hash = await self.ipfs_manager.upload_file(file_path)
-                if ipfs_hash:
-                    result_data['ipfs_hash'] = ipfs_hash
-                    ipfs_info = {
-                        'result_id': result_data['id'],
-                        'ipfs_hash': ipfs_hash,
-                        'timestamp': datetime.now().isoformat(),
-                        'file_path': file_path
-                    }
-                    ipfs_file_path = os.path.join(self.ipfs_dir, f"{result_data['id']}_ipfs.json")
-                    with open(ipfs_file_path, 'w') as f:
-                        json.dump(ipfs_info, f, indent=2)
-                    await self.ipfs_manager.pin_file(ipfs_hash)
+                try:
+                    ipfs_hash = await self.ipfs_manager.upload_file(file_path)
+                    if ipfs_hash:
+                        result_data['ipfs_hash'] = ipfs_hash
+                        ipfs_info = {
+                            'result_id': result_data['id'],
+                            'ipfs_hash': ipfs_hash,
+                            'timestamp': datetime.now().isoformat(),
+                            'file_path': file_path
+                        }
+                        ipfs_file_path = os.path.join(self.ipfs_dir, f"{result_data['id']}_ipfs.json")
+                        with open(ipfs_file_path, 'w') as f:
+                            json.dump(ipfs_info, f, indent=2)
+                        await self.ipfs_manager.pin_file(ipfs_hash)
+                        logger.info(f"IPFS連携が完了しました: {ipfs_hash}")
+                    else:
+                        logger.warning("IPFSアップロードに失敗しました")
+                except Exception as e:
+                    logger.warning(f"IPFS連携中にエラーが発生しました: {e}")
+            else:
+                logger.info("IPFSノードが利用できないため、IPFS連携をスキップします")
             
             return result_data
             
