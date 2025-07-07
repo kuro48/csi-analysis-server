@@ -1,0 +1,42 @@
+services:
+  # 解析サーバー（IPFS機能付き）
+  csi-analysis-server:
+    build: .
+    container_name: csi-analysis-server
+    ports:
+      - "8000:8000"  # 解析サーバーAPI
+    volumes:
+      - ./data:/app/data  # データの永続化
+      - ./logs:/app/logs  # ログの永続化
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - API_KEY=test-key-123
+      - IPFS_HOST=ipfs-node
+      - IPFS_PORT=5001
+      - IPFS_PROTOCOL=http
+    depends_on:
+      - ipfs-node
+    restart: unless-stopped
+    networks:
+      - csi-network
+
+  ipfs-node:
+    image: ipfs/go-ipfs:v0.20.0
+    container_name: ipfs-node
+    ports:
+      - "5001:5001"  # IPFS API
+      - "8080:8080"  # IPFS Gateway
+    volumes:
+      - ipfs_data:/data/ipfs
+    restart: unless-stopped
+    networks:
+      - csi-network
+
+volumes:
+  ipfs_data:
+    driver: local
+
+networks:
+  csi-network:
+    driver: bridge 
