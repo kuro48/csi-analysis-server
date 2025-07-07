@@ -40,24 +40,38 @@ class BreathingAnalysisResponse(BaseModel):
 
 class BreathingAnalysisResult(BaseModel):
     """呼吸解析結果モデル（データベース用）"""
-    id: str = Field(..., description="解析ID")
+    id: Optional[str] = Field(None, description="解析ID")
     device_id: str = Field(..., description="デバイスID")
-    window_results: List[WindowResult] = Field(..., description="ウィンドウ解析結果")
-    summary: AnalysisSummary = Field(..., description="解析サマリー")
-    metadata: Metadata = Field(..., description="メタデータ")
-    created_at: datetime = Field(..., description="作成日時")
-    updated_at: datetime = Field(..., description="更新日時")
+    timestamp: int = Field(..., description="タイムスタンプ")
+    breathing_rate: float = Field(..., description="呼吸数（bpm）")
+    peak_frequency: Optional[float] = Field(None, description="ピーク周波数")
+    peak_height: Optional[float] = Field(None, description="ピーク高さ")
+    selected_subcarriers: List[str] = Field(..., description="選択されたサブキャリア")
+    location: Optional[str] = Field(None, description="場所")
+    collection_duration: int = Field(..., description="収集時間")
+    channel_width: str = Field(..., description="チャンネル幅")
+    result_file_path: Optional[str] = Field(None, description="結果ファイルパス")
+    processed_at: str = Field(..., description="処理日時")
+    created_at: Optional[datetime] = Field(None, description="作成日時")
+    updated_at: Optional[datetime] = Field(None, description="更新日時")
     
     def to_dict(self) -> Dict[str, Any]:
         """辞書形式に変換"""
         return {
             "id": self.id,
             "device_id": self.device_id,
-            "window_results": [result.dict() for result in self.window_results],
-            "summary": self.summary.dict(),
-            "metadata": self.metadata.dict(),
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat()
+            "timestamp": self.timestamp,
+            "breathing_rate": self.breathing_rate,
+            "peak_frequency": self.peak_frequency,
+            "peak_height": self.peak_height,
+            "selected_subcarriers": self.selected_subcarriers,
+            "location": self.location,
+            "collection_duration": self.collection_duration,
+            "channel_width": self.channel_width,
+            "result_file_path": self.result_file_path,
+            "processed_at": self.processed_at,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None
         }
 
 class CSIDataMetadata(BaseModel):

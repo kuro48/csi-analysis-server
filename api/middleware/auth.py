@@ -5,7 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# 有効なAPIキーのリスト（実際の実装ではデータベースから取得）
+# 有効なAPIキーのリスト
 VALID_API_KEYS = {
     "raspberry_pi_001": "test-key-123",
     "raspberry_pi_002": "another_api_key_here"
