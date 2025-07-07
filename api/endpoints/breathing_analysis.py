@@ -63,7 +63,10 @@ async def analyze_breathing(
         # 解析の実行
         result = await analysis_service.analyze_breathing(request)
         
-        logger.info(f"呼吸解析が完了: {result.breathing_rate} bpm")
+        if result.breathing_rate is not None:
+            logger.info(f"呼吸解析が完了: {result.breathing_rate} bpm")
+        else:
+            logger.info("呼吸解析が完了: 呼吸数を検出できませんでした")
         return result
         
     except Exception as e:
@@ -133,7 +136,10 @@ async def upload_csi_file(
             
             await analysis_service.save_analysis_result(analysis_result)
             
-            logger.info(f"CSIファイルの処理が完了: {result['breathing_rate']} bpm")
+            if result['breathing_rate'] is not None:
+                logger.info(f"CSIファイルの処理が完了: {result['breathing_rate']} bpm")
+            else:
+                logger.info("CSIファイルの処理が完了: 呼吸数を検出できませんでした")
             
             return CSIUploadResponse(
                 success=True,
