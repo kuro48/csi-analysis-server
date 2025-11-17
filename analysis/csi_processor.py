@@ -360,12 +360,21 @@ class CSIProcessor:
             # サブキャリアの選択
             selected_cols = []
             similarities = {}
-            if baseline_fft is not None:
-                selected_cols, similarities = self.compute_similarity_and_select_subcarriers(fft_df, baseline_fft)
-            
-            if not selected_cols:
-                # ベースラインがない場合は、すべてのサブキャリアを使用
-                selected_cols = [col for col in fft_df.columns if col != 'frequency']
+
+            # ハードウェアで選択されたサブキャリアがメタデータに含まれている場合はそれを使用
+            if metadata.get('selected_subcarriers') is not None and len(metadata.get('selected_subcarriers')) > 0:
+                selected_cols = metadata.get('selected_subcarriers')
+                logger.info(f"ハードウェアで選択されたサブキャリアを使用: {selected_cols}")
+            else:
+                # ハードウェアで選択されていない場合は、サーバー側で選択（従来の方法）
+                if baseline_fft is not None:
+                    selected_cols, similarities = self.compute_similarity_and_select_subcarriers(fft_df, baseline_fft)
+                    logger.info(f"サーバー側でサブキャリアを選択: {selected_cols}")
+
+                if not selected_cols:
+                    # ベースラインがない場合は、すべてのサブキャリアを使用
+                    selected_cols = [col for col in fft_df.columns if col != 'frequency']
+                    logger.info(f"ベースラインがないため、すべてのサブキャリアを使用: {len(selected_cols)}個")
             
             # 呼吸数の検出
             peak_freq, peak_height, breathing_rate = self.find_peak_spectrum(fft_df, selected_cols)
