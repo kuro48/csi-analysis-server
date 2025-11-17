@@ -82,6 +82,7 @@ class CSIDataMetadata(BaseModel):
     collection_duration: Optional[int] = Field(None, description="収集時間")
     channel_width: Optional[str] = Field(None, description="チャンネル幅")
     location: Optional[str] = Field(None, description="場所")
+    selected_subcarriers: Optional[List[str]] = Field(None, description="ハードウェアで選択されたサブキャリア")
 
 class CSIDataFile(BaseModel):
     """CSIデータファイルモデル"""
